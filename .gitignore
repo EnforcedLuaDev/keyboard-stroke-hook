@@ -1,32 +1,25 @@
-# Prerequisites
-*.d
+#include <iostream>
+#include <Windows.h>
+HHOOK hook;
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+LRESULT CALLBACK LLKB_HOOK(int p_code, WPARAM wParam, LPARAM lParam){
+  KBDLLHOOKSTRUCT* kb_struct = (KBDLLHOOKSTRUCT*)lParam;
 
-# Precompiled Headers
-*.gch
-*.pch
+  if(p_code == HC_ACTION){
+    std::cout << "Hooked Key Press: " << (char)(kb_struct->vkCode) << "\n";
+  }
+  return CallNextHookEx(hook, p_code, wParam, lParam);
+}
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+int main(){
+  hook = SetWindowsHookEx(WH_KEYBOARD_LL, LLKB_HOOK, 0, 0);
 
-# Fortran module files
-*.mod
-*.smod
+  MSG msg;
+  while(!GetMessage(&msg, NULL, 0, 0)){
+    TranslateMessage(&msg);
+    DispatchMessage(&msg);
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+  }
+  UnhookWindowsHookEx(hook);
+  return 0;
+}
